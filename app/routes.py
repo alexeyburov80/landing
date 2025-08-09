@@ -1,7 +1,11 @@
+import os
+
 from app import app
 from app.email import send_email_to_admin
-from flask import request, jsonify
+from flask import Flask, request, jsonify, send_from_directory, abort
 from datetime import datetime
+
+FILES_DIR = "./files"
 
 @app.route('/')
 @app.route('/index')
@@ -32,3 +36,23 @@ def send_email_endpoint():
         return jsonify({'error': str(e)}), 400
     except Exception as e:
         return jsonify({'error': f'Ошибка сервера: {str(e)}'}), 500
+
+@app.route('/download', methods=['GET'])
+def download_file():
+    # Получаем имя файла из параметров запроса
+    filename = request.args.get('filename')
+
+    if not filename:
+        return jsonify({"error": "Не указано имя файла"}), 400
+
+    # Безопасная проверка — чтобы нельзя было запросить файлы вне папки
+    if ".." in filename or filename.startswith("/"):
+        return jsonify({"error": "Некорректное имя файла"}), 400
+
+    # Проверяем, что файл существует
+    filepath = os.path.join(FILES_DIR, filename)
+    if not os.path.exists(filepath):
+        abort(404, description="Файл не найден")
+
+    # Отправляем файл пользователю
+    return send_from_directory(FILES_DIR, filename, as_attachment=True)
