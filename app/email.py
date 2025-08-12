@@ -2,10 +2,15 @@ from flask_mail import Message
 from datetime import datetime
 from app import mail
 from flask import current_app
+import request
 
 
 def send_email_to_admin(description, contacts):
     """Отправляет письмо на админский ящик с данными из формы"""
+
+    # Получаем IP пользователя
+    user_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+
     try:
         # Валидация данных
         if len(description) > 256:
@@ -24,7 +29,8 @@ def send_email_to_admin(description, contacts):
         Описание: {description}
         Контакты: {', '.join(contacts)}
         Дата отправки (серверное время): {send_date}
-
+        Айпи: {user_ip}
+        
         ---
         Это письмо сгенерировано автоматически
         """
