@@ -18,11 +18,12 @@ def send_email_endpoint():
     try:
         data = request.json
 
-        if not all(key in data for key in ['description', 'contacts']):
-            return jsonify({'error': 'Необходимы description и contacts'}), 400
+        if not all(key in data for key in ['name', 'description', 'contacts']):
+            return jsonify({'error': 'Необходимы name, description и contacts'}), 400
 
         # Отправляем письмо себе (дата будет определена внутри функции)
         send_email_to_admin(
+            name=data['name'],
             description=data['description'],
             contacts=data['contacts']
         )

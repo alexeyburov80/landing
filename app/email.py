@@ -1,11 +1,10 @@
 from flask_mail import Message
 from datetime import datetime
 from app import mail
-from flask import current_app
-import request
+from flask import current_app, request
 
 
-def send_email_to_admin(description, contacts):
+def send_email_to_admin(name, description, contacts):
     """Отправляет письмо на админский ящик с данными из формы"""
 
     # Получаем IP пользователя
@@ -24,12 +23,15 @@ def send_email_to_admin(description, contacts):
 
         # Формируем текст письма для админа
         email_body = f"""
-        Новый запрос на отправку письма:
-
+        Отклик с сайта:
+        
+        Имя: {name}
         Описание: {description}
         Контакты: {', '.join(contacts)}
+        
         Дата отправки (серверное время): {send_date}
-        Айпи: {user_ip}
+        
+        IP: {user_ip}
         
         ---
         Это письмо сгенерировано автоматически
@@ -40,7 +42,7 @@ def send_email_to_admin(description, contacts):
 
         # Создаем и отправляем письмо
         msg = Message(
-            subject=f"Запрос на отправку письма ({send_date})",
+            subject=f"Запрос на отправку письма от {name} ({send_date})",
             recipients=[admin_email],
             body=email_body
         )
